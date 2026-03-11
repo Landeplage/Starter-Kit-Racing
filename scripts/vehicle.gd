@@ -115,7 +115,7 @@ func effect_body(delta):
 func effect_wheels(delta):
 	
 	for wheel in [wheel_fl, wheel_fr, wheel_bl, wheel_br]:
-		wheel.rotation.x -= acceleration
+		wheel.rotation.x += acceleration
 	
 	wheel_fl.rotation.y = lerp_angle(wheel_fl.rotation.y, -input.x / 1.5, delta * 10)
 	wheel_fr.rotation.y = lerp_angle(wheel_fr.rotation.y, -input.x / 1.5, delta * 10)
