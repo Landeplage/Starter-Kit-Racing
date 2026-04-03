@@ -27,9 +27,16 @@ func _ready() -> void:
 		add_child(player)
 		layer.player = player
 
+var _jitter_time: float = 0.0
+
 func set_current_rpm_factor(rpm_factor: float) -> void:
 	if layers.is_empty(): return
-	var rpm = min_rpm + clampf(rpm_factor, 0.0, 1.0) * (max_rpm - min_rpm)
+
+	# Subtle RPM jitter so the sound is never perfectly static
+	_jitter_time += get_process_delta_time() * 5.0
+	var jitter = sin(_jitter_time * 3.7) * 0.01 + sin(_jitter_time * 7.1) * 0.008
+
+	var rpm = min_rpm + clampf(rpm_factor + jitter, 0.0, 1.0) * (max_rpm - min_rpm)
 
 	# Find which two layers we sit between
 	var low_idx := 0

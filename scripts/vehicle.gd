@@ -151,7 +151,12 @@ func effect_engine(delta):
 
 	var speed_factor = clamp(abs(linear_speed), 0.0, 1.0)
 	var throttle_factor = clamp(abs(input.z), 0.0, 1.0)
-	var rpm_factor = speed_factor * 0.9 + throttle_factor * 0.1
+
+	# Steering causes engine load, pulling RPM down
+	var steering_load = abs(input.x) * clamp(speed_factor, 0.0, 0.5) * 0.5
+
+	var rpm_factor = speed_factor * 0.9 + throttle_factor * 0.1 - steering_load
+	rpm_factor = clamp(rpm_factor, 0.0, 1.0)
 	throttle_smooth = lerp(throttle_smooth, rpm_factor, delta * 1.0)
 	engine_sound.set_current_rpm_factor(throttle_smooth)
 
