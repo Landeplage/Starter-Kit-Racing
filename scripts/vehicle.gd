@@ -25,8 +25,8 @@ class_name Vehicle extends Node3D
 # Sounds
 
 @onready var screech_sound: AudioStreamPlayer3D = $Container/ScreechSound
-@onready var engine_sound: AudioStreamPlayer3D = $Container/EngineSound
 @onready var impact_sound: AudioStreamPlayer3D = $Container/ImpactSound
+@export var engine_sound: EngineSound
 
 var input: Vector3
 var normal: Vector3
@@ -34,6 +34,7 @@ var normal: Vector3
 var acceleration: float
 var angular_speed: float
 var linear_speed: float
+var throttle_smooth: float
 
 var colliding: bool
 
@@ -119,18 +120,18 @@ func handle_input(delta):
 	sphere.angular_velocity += vehicle_model.get_global_transform().basis.x * (linear_speed * 100) * delta
 
 func effect_body(delta):
-	
+
 	calculated_lean = lerp_angle(calculated_lean, -input.x / 5 * linear_speed, delta * 5)
-	
+
 	# Slightly tilt (and move) body based on acceleration and steering
-	
+
 	if vehicle_body != null:
-		
+
 		vehicle_body.rotation.x = lerp_angle(vehicle_body.rotation.x, -(linear_speed - acceleration) / 6, delta * 10)
 		vehicle_body.rotation.z = calculated_lean
-		
+
 		vehicle_body.position = vehicle_body.position.lerp(Vector3(0, 0.2, 0), delta * 5)
-	
+
 func effect_wheels(delta):
 
 	# Rotate wheels based on acceleration
@@ -150,14 +151,9 @@ func effect_engine(delta):
 
 	var speed_factor = clamp(abs(linear_speed), 0.0, 1.0)
 	var throttle_factor = clamp(abs(input.z), 0.0, 1.0)
-
-	var target_volume = remap(speed_factor + (throttle_factor * 0.5), 0.0, 1.5, -15.0, -5.0)
-	engine_sound.volume_db = lerp(engine_sound.volume_db, target_volume, delta * 5.0)
-
-	var target_pitch = remap(speed_factor, 0.0, 1.0, 0.5, 3)
-	if throttle_factor > 0.1: target_pitch += 0.2
-
-	engine_sound.pitch_scale = lerp(engine_sound.pitch_scale, target_pitch, delta * 2.0)
+	var rpm_factor = speed_factor * 0.9 + throttle_factor * 0.1
+	throttle_smooth = lerp(throttle_smooth, rpm_factor, delta * 1.0)
+	engine_sound.set_current_rpm_factor(throttle_smooth)
 
 # Show trails (and play skid sound)
 
@@ -187,9 +183,9 @@ func align_with_y(xform, new_y):
 # Detect collisions and play impact sound
 
 func _on_sphere_body_entered(_body: Node) -> void:
-	
+
 	if vehicle_body == null: return
-	
+
 	if not impact_sound.playing:
 		var impact_velocity := absf(linear_velocity.dot(vehicle_body.global_basis.z))
 		impact_sound.volume_db = clampf(remap(impact_velocity, 0.0, 6.0, -20.0, 0.0), -20.0, 0.0)

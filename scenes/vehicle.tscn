@@ -4,8 +4,13 @@
 [ext_resource type="PackedScene" uid="uid://bynb5jk1d478y" path="res://models/vehicle-truck-yellow.glb" id="2_vuxys"]
 [ext_resource type="Texture2D" uid="uid://c026qrhqxgw3n" path="res://sprites/smoke.png" id="3_p2hth"]
 [ext_resource type="AudioStream" uid="uid://2in1jtv5bh0y" path="res://audio/skid.ogg" id="4_mcce1"]
-[ext_resource type="AudioStream" uid="uid://j6x2is8pyt8y" path="res://audio/engine.ogg" id="5_kcati"]
+[ext_resource type="Script" uid="uid://v5kepokr3lsm" path="res://scripts/engine_sound.gd" id="6_mcce1"]
+[ext_resource type="AudioStream" uid="uid://xgr038t5ydby" path="res://audio/engine_600rpm.ogg" id="6_p2hth"]
 [ext_resource type="AudioStream" uid="uid://io4pmr3lo1dy" path="res://audio/impact.ogg" id="6_v3p7b"]
+[ext_resource type="AudioStream" uid="uid://ctrpvpl26rwse" path="res://audio/engine_1500rpm.ogg" id="7_mcce1"]
+[ext_resource type="Script" uid="uid://w8ffkqdfill8" path="res://scripts/engine_sound_layer.gd" id="7_v3p7b"]
+[ext_resource type="AudioStream" uid="uid://cbjhi765qppb2" path="res://audio/engine_3000rpm.ogg" id="9_kcati"]
+[ext_resource type="AudioStream" uid="uid://casvpgen0ux0s" path="res://audio/engine_4500rpm.ogg" id="10_v3p7b"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tfk12"]
 transparency = 1
@@ -51,14 +56,39 @@ alpha_curve = SubResource("CurveTexture_mya1o")
 
 [sub_resource type="QuadMesh" id="QuadMesh_68fxn"]
 
+[sub_resource type="Resource" id="Resource_srgl8"]
+script = ExtResource("7_v3p7b")
+stream = ExtResource("6_p2hth")
+rpm = 600.0
+metadata/_custom_type_script = "uid://w8ffkqdfill8"
+
+[sub_resource type="Resource" id="Resource_mhnq0"]
+script = ExtResource("7_v3p7b")
+stream = ExtResource("7_mcce1")
+rpm = 1500.0
+metadata/_custom_type_script = "uid://w8ffkqdfill8"
+
+[sub_resource type="Resource" id="Resource_wg7bq"]
+script = ExtResource("7_v3p7b")
+stream = ExtResource("9_kcati")
+rpm = 3000.0
+metadata/_custom_type_script = "uid://w8ffkqdfill8"
+
+[sub_resource type="Resource" id="Resource_eewpg"]
+script = ExtResource("7_v3p7b")
+stream = ExtResource("10_v3p7b")
+rpm = 4500.0
+metadata/_custom_type_script = "uid://w8ffkqdfill8"
+
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_eyo0u"]
 friction = 5.0
 rough = true
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_hhncp"]
 
-[node name="Vehicle" type="Node3D" unique_id=1867641805]
+[node name="Vehicle" type="Node3D" unique_id=1867641805 node_paths=PackedStringArray("engine_sound")]
 script = ExtResource("1_e2g1l")
+engine_sound = NodePath("Container/EngineSound")
 
 [node name="Ground" type="RayCast3D" parent="." unique_id=496963048]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
@@ -94,12 +124,12 @@ draw_pass_1 = SubResource("QuadMesh_68fxn")
 stream = ExtResource("4_mcce1")
 autoplay = true
 
-[node name="EngineSound" type="AudioStreamPlayer3D" parent="Container" unique_id=397905471]
-stream = ExtResource("5_kcati")
-autoplay = true
-
 [node name="ImpactSound" type="AudioStreamPlayer3D" parent="Container" unique_id=1542612165]
 stream = ExtResource("6_v3p7b")
+
+[node name="EngineSound" type="Node3D" parent="Container" unique_id=124575640]
+script = ExtResource("6_mcce1")
+layers = Array[ExtResource("7_v3p7b")]([SubResource("Resource_srgl8"), SubResource("Resource_mhnq0"), SubResource("Resource_wg7bq"), SubResource("Resource_eewpg")])
 
 [node name="Sphere" type="RigidBody3D" parent="." unique_id=1368519146]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
